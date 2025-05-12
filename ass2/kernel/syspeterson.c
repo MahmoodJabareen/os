@@ -30,3 +30,5 @@ uint64 sys_peterson_destroy(void){
     argint(0 , &lock_id) ;
     return peterson_destroy(lock_id) ;
 }
+
+///test 

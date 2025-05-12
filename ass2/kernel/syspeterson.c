@@ -31,4 +31,3 @@ uint64 sys_peterson_destroy(void){
     return peterson_destroy(lock_id) ;
 }
 
-// test 2

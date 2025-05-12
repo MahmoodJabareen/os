@@ -1,6 +1,7 @@
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "user/user.h"
+#include <math.h>
 
 int tournament_create(int processes) {
     if( processes !=1 &&processes !=2 && processes !=4 && processes !=8 && processes !=16 )
@@ -8,7 +9,7 @@ int tournament_create(int processes) {
     
     int trnmnt_id = -1 ; 
     int lock_id = 0 ;
-    int pid ;
+    int curr_pid ;
 
     for(int i = 1 ; i < processes ; i++ ){
         if(peterson_create() < 0) {
@@ -16,6 +17,21 @@ int tournament_create(int processes) {
         }
     }
     
+    for(int i = 0 ; i < processes ; i++){
+        curr_pid = fork() ; 
+        if(curr_pid < 0){ // fork failed 
+            return -1 ;
+        }
+        else if(curr_pid == 0) {
+            for(int level = 0 ; level < processes / 2 ; level++) {
+                lock_id = i / (int)pow(2 , level) ;
+                peterson_acquire(lock_id , i % 2) ;
+            }
+            exit(0) ;
+        }
+    }
+    trnmnt_id = getpid() ; // parent id
+    return trnmnt_id ;
 
 }
 

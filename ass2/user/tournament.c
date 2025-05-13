@@ -19,7 +19,22 @@ int main(int argc , char** argv){
         exit(1);
     }
 
-    
+    if (tournament_acquire() < 0) {
+        fprintf(2, "failed acquiring\n");
+        exit(1);
+    }
+
+
+    printf("Process with PID %d, Tournament ID %d has entered the critical section\n", getpid(), tournament_id);
+    sleep(10);  // hold the lock for a while to test mutual exclusion
+    printf("Process with PID %d, Tournament ID %d is leaving the critical section\n", getpid(), tournament_id);
+
+    if (tournament_release() < 0) {
+        fprintf(2, "failed releasing\n");
+        exit(1);
+    }
+
+    exit(0) ;
 
 
 }

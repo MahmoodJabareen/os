@@ -124,6 +124,7 @@ UPROGS=\
 	$U/_petersontest\
 	$U/_ptest2\
 	$U/_ptest3\
+	$U/_tournament\
 	$U/_grep\
 	$U/_init\
 	$U/_kill\

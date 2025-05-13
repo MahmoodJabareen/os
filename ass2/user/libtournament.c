@@ -4,19 +4,29 @@
 #include <math.h>
 
 #define MAX_PROCESSES 16
-#define MAX_LOCK (MAX_PROCESSES-1)
+#define MAX_LOCKS (MAX_PROCESSES-1)
 
 int tournament_id = -1 ;
 int num_levels = 0 ;
 int num_processes = 0 ;
-int* lock_ids = 0 ;
+int lock_ids[MAX_LOCKS] ; 
 
 static int is_power_of_two(int x) {
     return x > 0 && (x & (x - 1)) == 0;
 }
+static int log2(int n) {
+  if (n <= 1) 
+    return 0;
+  int l = 0;
+  while (n > 1) {
+    n /= 2;
+    l++;
+  }
+  return l;
+}
 
 int tournament_create(int processes) {
-   if(  processes > MAX_PROCESSES ||!is_power_of_two(processes)) return -1 ;
+   if(  processes <=0 ||processes > MAX_PROCESSES || !is_power_of_two(processes)) return -1 ;
 
    num_processes = processes ;
    
@@ -26,9 +36,7 @@ int tournament_create(int processes) {
     
    int total_locks = (1 << num_levels) -1 ;
 
-   lock_ids = malloc(sizeof(int) * total_locks);
-    if (!lock_ids)
-        return -1;
+
 
 
     return 1 ;    

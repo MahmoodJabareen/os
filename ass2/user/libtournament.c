@@ -16,9 +16,24 @@ static int is_power_of_two(int x) {
 }
 
 int tournament_create(int processes) {
+   if(  processes > MAX_PROCESSES ||!is_power_of_two(processes)) return -1 ;
+
+   num_processes = processes ;
    
+   int temp = processes ;
+   while(temp >>=1)
+        num_levels ++ ;
+    
+   int total_locks = (1 << num_levels) -1 ;
+
+   lock_ids = malloc(sizeof(int) * total_locks);
+    if (!lock_ids)
+        return -1;
+
+
+    return 1 ;    
 }
 
-int tournament_acquire(void) {}
+int tournament_acquire(void) { return 0;}
 
-int tournament_release(void){}
+int tournament_release(void){ return 0;}

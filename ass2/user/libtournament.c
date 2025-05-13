@@ -39,11 +39,17 @@ int tournament_create(int processes) {
     }
    }
 
-   for(int i )
-
-
-
-    return 1 ;    
+   trnmnt_idx = 0;
+   for(int i = 1; i < processes  ; i++){
+        int pid = fork() ;
+        if(pid < 0)
+            return -1 ;
+        if(pid == 0){
+            trnmnt_idx = i ;
+            return trnmnt_idx ;
+        }
+   }
+return trnmnt_idx ;
 }
 
 int tournament_acquire(void) { return 0;}

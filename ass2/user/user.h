@@ -29,6 +29,11 @@ int peterson_acquire(int lock_id, int role);
 int peterson_release(int lock_id, int role);
 int peterson_destroy(int lock_id);
 
+//TASK2
+int tournament_create(int procs) ;
+int tournament_acquire(void);
+int tournament_release(void);
+
 // ulib.c
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);

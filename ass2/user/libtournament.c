@@ -1,15 +1,13 @@
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "user/user.h"
-#include <math.h>
 
 #define MAX_PROCESSES 16
 #define MAX_LOCKS (MAX_PROCESSES-1)
 
-int tournament_id = -1 ;
 int num_levels = 0 ;
 int num_processes = 0 ;
-int trnmnt_idx = 0;
+int trnmnt_id = 0;
 int lock_ids[MAX_LOCKS] ; 
 
 static int is_power_of_two(int x) {
@@ -39,17 +37,17 @@ int tournament_create(int processes) {
     }
    }
 
-   trnmnt_idx = 0;
+   trnmnt_id = 0;
    for(int i = 1; i < processes  ; i++){
         int pid = fork() ;
         if(pid < 0)
             return -1 ;
         if(pid == 0){
-            trnmnt_idx = i ;
-            return trnmnt_idx ;
+            trnmnt_id = i ;
+            return trnmnt_id ;
         }
    }
-return trnmnt_idx ;
+return trnmnt_id ;
 }
 
 int tournament_acquire(void) { return 0;}

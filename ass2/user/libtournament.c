@@ -7,7 +7,7 @@
 
 int num_levels = 0 ;
 int num_processes = 0 ;
-int trnmnt_id = 0;
+int trnmnt_idx = 0;
 int lock_ids[MAX_LOCKS] ; 
 
 static int is_power_of_two(int x) {
@@ -37,19 +37,51 @@ int tournament_create(int processes) {
     }
    }
 
-   trnmnt_id = 0;
+   trnmnt_idx = 0;
    for(int i = 1; i < processes  ; i++){
         int pid = fork() ;
         if(pid < 0)
             return -1 ;
         if(pid == 0){
-            trnmnt_id = i ;
-            return trnmnt_id ;
+            trnmnt_idx = i ;
+            return trnmnt_idx ;
         }
    }
-return trnmnt_id ;
+return trnmnt_idx ;
 }
 
-int tournament_acquire(void) { return 0;}
+int tournament_acquire(void){ 
 
-int tournament_release(void){ return 0;}
+    if(trnmnt_idx < 0 || num_levels <=0) return -1;
+
+    for(int lvl = 0 ; lvl < num_levels ; lvl++){
+        int role = (trnmnt_idx&(1<<(num_levels-lvl-1)))>>(num_levels-lvl-1) ;
+        int lockl = trnmnt_idx>>(num_levels-lvl) ;
+        int lockidx = lockl + (1<<lvl) -1 ;
+        if(lockidx>=MAX_LOCKS) return -1 ;
+
+        peterson_acquire(lock_ids[lockidx] , role) ;
+
+    }
+return 0 ;
+}
+
+int tournament_release(void) {
+
+    if(trnmnt_idx < 0 || num_levels <=0) return -1;
+
+    for(int lvl = num_levels -1 ; lvl >=0  ; lvl--){
+        int role = (trnmnt_idx&(1<<(num_levels-lvl-1)))>>(num_levels-lvl-1) ;
+        int lockl = trnmnt_idx>>(num_levels-lvl) ;
+        int lockidx = lockl + (1<<lvl) -1 ;
+        if(lockidx>=MAX_LOCKS) return -1 ;
+
+        peterson_release(lock_ids[lockidx] , role) ;
+
+    }
+return 0 ;
+
+
+}
+
+

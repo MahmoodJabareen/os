@@ -9,6 +9,7 @@
 int tournament_id = -1 ;
 int num_levels = 0 ;
 int num_processes = 0 ;
+int trnmnt_idx = 0;
 int lock_ids[MAX_LOCKS] ; 
 
 static int is_power_of_two(int x) {
@@ -29,13 +30,16 @@ int tournament_create(int processes) {
    if(  processes <=0 ||processes > MAX_PROCESSES || !is_power_of_two(processes)) return -1 ;
 
    num_processes = processes ;
-   
-   int temp = processes ;
-   while(temp >>=1)
-        num_levels ++ ;
-    
-   int total_locks = (1 << num_levels) -1 ;
+   num_levels = log2(processes) ;
 
+   for(int i = 0; i < processes -1 ; i++){
+    lock_ids[i]= peterson_create() ;
+    if(lock_ids[i] <0){
+        return -1; //failed to create lock
+    }
+   }
+
+   for(int i )
 
 
 

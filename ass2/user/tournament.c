@@ -26,7 +26,8 @@ int main(int argc , char** argv){
 
 
     printf("Process with PID %d, Tournament ID %d has entered the critical section\n", getpid(), tournament_id);
-    sleep(10);  // hold the lock for a while to test mutual exclusion
+    // sleep(10);  // hold the lock for a while to test mutual exclusion
+   
     printf("Process with PID %d, Tournament ID %d is leaving the critical section\n", getpid(), tournament_id);
 
     if (tournament_release() < 0) {

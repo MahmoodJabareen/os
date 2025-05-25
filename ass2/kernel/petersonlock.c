@@ -58,9 +58,6 @@ int peterson_acquire(int lock_id , int role) {
     }
     return 0 ; 
 }
-
-
-
 int peterson_release(int lock_id , int role){
     
 

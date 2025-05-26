@@ -451,7 +451,7 @@ map_shared_pages(struct proc* src_proc,struct proc* dst_proc,uint64 src_va, uint
   uint64 dst_va = dst_start ;
 
   for(uint64 va = start ; va < end ; va+=PGSIZE , dst_va+=PGSIZE  ){
-    pte_t* pte = walk(&src_proc->pagetable , src_va , 0 ) ; // aloc is 0 so dont create new page table
+    pte_t* pte = walk(&src_proc->pagetable , va , 0 ) ; // aloc is 0 so dont create new page table
 
     if(pte == 0 || (*pte & PTE_V) == 0 || (*pte & PTE_U) == 0 ){
     //invalid mapping (valid bit is 0 or the page is not accesible to user )

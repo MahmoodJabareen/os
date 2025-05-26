@@ -445,30 +445,30 @@ map_shared_pages(struct proc* src_proc,struct proc* dst_proc,uint64 src_va, uint
 {
   uint64 start = PGROUNDDOWN(src_va) ;
   uint64 end = PGROUNDUP(src_va + size) ;
+  uint64 offset = src_va - start ;
   
-  pte_t* pte = walk(&src_proc->pagetable , src_va , 0 ) ; // aloc is 0 so dont create new page table
+  uint64 dst_start = PGROUNDUP(dst_proc->sz) ;
+  uint64 dst_va = dst_start ;
 
-  if(pte == 0 || (*pte & PTE_V) == 0 || (*pte & PTE_U) == 0 ){
+  for(uint64 va = start ; va < end ; va+=PGSIZE , dst_va+=PGSIZE  ){
+    pte_t* pte = walk(&src_proc->pagetable , src_va , 0 ) ; // aloc is 0 so dont create new page table
 
+    if(pte == 0 || (*pte & PTE_V) == 0 || (*pte & PTE_U) == 0 ){
     //invalid mapping (valid bit is 0 or the page is not accesible to user )
     return 0 ;
+    }
 
-  }
-  uint64 pa = PTE2PA(*pte) ; // physical address
-  int flags  =PTE_FLAGS(*pte) ;
-  flags |= PTE_S; // add shared flag (bit 8)
-  uint64 dst_va = PGROUNDUP(dst_proc->sz) ;
+    uint64 pa = PTE2PA(*pte) ; // physical address
+    int flags  =PTE_FLAGS(*pte) ;
+    flags |= PTE_S; // add shared flag (bit 8)
+  
 
-  if(mappages(dst_proc->pagetable , dst_va , PGSIZE , pa , flags) !=0){
+    if(mappages(dst_proc->pagetable , dst_va , PGSIZE , pa , flags) !=0){
     //failed mapping 
-    return 0;
+     return 0;
+    }
   }
-
-  dst_proc->sz += PGSIZE; //maintain the correct size of the address space
-
-  
-
-  
-
+  dst_proc->sz = dst_va ; //maintain the correct size of the address space
+  return dst_start + offset ;
 
 }

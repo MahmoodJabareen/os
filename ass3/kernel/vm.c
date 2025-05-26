@@ -5,6 +5,7 @@
 #include "riscv.h"
 #include "defs.h"
 #include "fs.h"
+#include "proc.h"
 
 /*
  * the kernel's page table.
@@ -436,4 +437,38 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
   } else {
     return -1;
   }
+}
+
+
+uint64 
+map_shared_pages(struct proc* src_proc,struct proc* dst_proc,uint64 src_va, uint64 size)
+{
+  uint64 start = PGROUNDDOWN(src_va) ;
+  uint64 end = PGROUNDUP(src_va + size) ;
+  
+  pte_t* pte = walk(&src_proc->pagetable , src_va , 0 ) ; // aloc is 0 so dont create new page table
+
+  if(pte == 0 || (*pte & PTE_V) == 0 || (*pte & PTE_U) == 0 ){
+
+    //invalid mapping (valid bit is 0 or the page is not accesible to user )
+    return 0 ;
+
+  }
+  uint64 pa = PTE2PA(*pte) ; // physical address
+  int flags  =PTE_FLAGS(*pte) ;
+  flags |= PTE_S; // add shared flag (bit 8)
+  uint64 dst_va = PGROUNDUP(dst_proc->sz) ;
+
+  if(mappages(dst_proc->pagetable , dst_va , PGSIZE , pa , flags) !=0){
+    //failed mapping 
+    return 0;
+  }
+
+  dst_proc->sz += PGSIZE; //maintain the correct size of the address space
+
+  
+
+  
+
+
 }

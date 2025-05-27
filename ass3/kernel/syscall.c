@@ -103,6 +103,7 @@ extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
 extern uint64 sys_map_shared_pages(void);
 extern uint64 sys_unmap_shared_pages(void);
+extern uint64 sys_getprocsize(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -129,7 +130,8 @@ static uint64 (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_map_shared_pages]    sys_map_shared_pages,
-[SYS_unmap_shared_pages]  sys_unmap_shared_pages
+[SYS_unmap_shared_pages]  sys_unmap_shared_pages,
+[SYS_getprocsize] sys_getprocsize,
 };
 
 void

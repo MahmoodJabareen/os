@@ -127,8 +127,11 @@ sys_unmap_shared_pages(void){
     return -1 ;
     
   return unmap_shared_pages(dst_proc , addr , size) ;
-  
-  
-  
-  
+}
+
+uint64
+sys_getprocsize(void)
+{
+  struct proc *p = myproc();
+  return p->sz;
 }

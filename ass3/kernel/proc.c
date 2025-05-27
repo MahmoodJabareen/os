@@ -681,7 +681,6 @@ procdump(void)
     printf("\n");
   }
 }
-
 struct proc*
 find_proc(int pid){
   struct proc* p;

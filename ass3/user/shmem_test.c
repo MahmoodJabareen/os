@@ -6,15 +6,16 @@
 int main(int argc, char *argv[])
 { 
     printf("Parent before malloc: %d\n", getprocsize());
-    char* memory = malloc(500); 
+    
+    char* memory =(char*)malloc(12*sizeof(char)); 
     int parent_id = getpid();
     printf("Parent after malloc: %d\n", getprocsize());
     if(fork() == 0) {
 
         printf("Child memory before: %d\n", getprocsize());
         char* ptr;
-
-        if((ptr = (char*) map_shared_pages(parent_id,getpid(), (uint64)memory, 10)) < 0){
+        
+        if((ptr = (char*) map_shared_pages(parent_id,getpid(), (uint64)memory, 12*sizeof(char))) < 0){
             printf("Error in map\n");
             exit(0);
         }
@@ -23,7 +24,7 @@ int main(int argc, char *argv[])
         strcpy(ptr, "Hello daddy");
         // int child_id=getpid();
         //unmapping
-        unmap_shared_pages((uint64)ptr,sizeof(memory));
+        unmap_shared_pages((uint64)ptr,12*sizeof(char));
         printf("Child after unmap %d\n", getprocsize());
 
         malloc(40*PGSIZE);
@@ -40,3 +41,5 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
+

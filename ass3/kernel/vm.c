@@ -502,5 +502,3 @@ unmap_shared_pages(struct proc* p, uint64 addr, uint64 size)
   return 0;
 }
 
-
-

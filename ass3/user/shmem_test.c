@@ -1,7 +1,7 @@
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "user/user.h"
-
+#include "kernel/riscv.h"
 
 int main(int argc, char *argv[])
 { 
@@ -23,10 +23,10 @@ int main(int argc, char *argv[])
         strcpy(ptr, "Hello daddy");
         // int child_id=getpid();
         //unmapping
-        unmap_shared_pages((uint64)ptr,10);
+        unmap_shared_pages((uint64)ptr,sizeof(memory));
         printf("Child after unmap %d\n", getprocsize());
 
-        malloc(40*4096);
+        malloc(40*PGSIZE);
 
         printf("Child after allocating memmory: %d\n", getprocsize()); 
 

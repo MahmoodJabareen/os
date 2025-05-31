@@ -8,6 +8,8 @@
 #include "spinlock.h"
 #include "proc.h"
 
+#include <inttypes.h>
+
 
 /*
  * the kernel's page table.
@@ -186,11 +188,11 @@ uvmunmap(pagetable_t pagetable, uint64 va, uint64 npages, int do_free)
       panic("uvmunmap: not mapped");
     if(PTE_FLAGS(*pte) == PTE_V)
       panic("uvmunmap: not a leaf");
-    if(do_free){
-      if((*pte &PTE_S) ==0){ // ONLY FREE IF THE PAGE IS NOT SHARED
+    if(do_free && (*pte & PTE_S) == 0 ){
+       // ONLY FREE IF THE PAGE IS NOT SHARED
       uint64 pa = PTE2PA(*pte);
       kfree((void*)pa);
-      }
+      
     }
     *pte = 0;
   }
@@ -461,16 +463,21 @@ map_shared_pages(struct proc* src_proc,struct proc* dst_proc,uint64 src_va, uint
     //invalid mapping (valid bit is 0 or the page is not accesible to user )
     return 0 ;
     }
-
     uint64 pa = PTE2PA(*pte) ; // physical address
+     if(pa == 0) {
+      printf("Error: Invalid physical address for VA 0x%p\n", va);
+      return 0;
+    }
     int flags  =PTE_FLAGS(*pte) ;
     flags |= PTE_S; // add shared flag (bit 8)
-  
-
     if(mappages(dst_proc->pagetable , dst_va , PGSIZE , pa , flags) !=0){
-    //failed mapping 
-     return 0;
+    //failed mapping cleanup what we've mapped so far
+     if(dst_va > dst_start) {
+        uvmunmap(dst_proc->pagetable, dst_start, (dst_va - dst_start) / PGSIZE, 0);
+      }
+      return 0;
     }
+    
   }
   dst_proc->sz = dst_va ; //maintain the correct size of the address space
   return dst_start + offset ;
@@ -481,19 +488,19 @@ uint64
 unmap_shared_pages(struct proc* p, uint64 addr, uint64 size)
 {
   uint64 start = PGROUNDDOWN(addr);
-  uint64 end = PGROUNDUP(addr + size) ;
+  uint64 end = PGROUNDUP(addr + size);
 
-  for(uint va = start ; va < end ; va +=PGSIZE) {
-    pte_t* pte = walk(p->pagetable , va , 0);
-
-    if(pte == 0 || (*pte & PTE_V) == 0 || (*pte & PTE_U) == 0 || (*pte &PTE_S) ==0 ){
-    //invalid mapping (valid bit is 0 or the page is not accesible to user )
-    return -1 ;
+  for (uint64 va = start; va < end; va += PGSIZE) {
+    pte_t* pte = walk(p->pagetable, va, 0);
+    if (pte == 0 || (*pte & PTE_V) == 0 || (*pte & PTE_U) == 0 || (*pte & PTE_S) == 0) {
+      printf("[unmap] Failed at VA 0x%x: PTE=0x%x\n", va, pte ? *pte : 0);
+      return -1;
     }
-    uvmunmap(pte , va , 1, 0) ; // unmap one page , 0 means do not free physical memory
-
+    uvmunmap(p->pagetable, va, 1, 0); 
   }
-  p->sz -= (end - start) ;// subtract rounded size (not size from args) 
-  return 0 ;
-
+  p->sz -= (end - start);
+  return 0;
 }
+
+
+

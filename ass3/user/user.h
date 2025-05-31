@@ -41,5 +41,5 @@ int atoi(const char*);
 int memcmp(const void *, const void *, uint);
 void *memcpy(void *, const void *, uint);
 
-int map_shared_pages(int dst_pid, uint64 src_va, uint64 size);
-int unmap_shared_pages(uint64 addr, uint64 size);
+uint64 map_shared_pages(int src_pid,int dst_pid, uint64 src_va, int size);
+uint64 unmap_shared_pages(uint64 addr, int size);

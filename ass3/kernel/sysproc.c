@@ -90,43 +90,82 @@ sys_uptime(void)
   return xticks;
 }
 
-uint64
-sys_map_shared_pages(void) {
-  int dst_pid ;
-  uint64   src_va, size;
+// uint64
+// sys_map_shared_pages(void) {
+//   int dst_pid ;
+//   uint64   src_va, size;
 
-  argint(0, &dst_pid) ;
-  argaddr(1 , &src_va) ; 
-  argaddr(2 , &size) ;
+//   argint(0, &dst_pid) ;
+//   argaddr(1 , &src_va) ; 
+//   argaddr(2 , &size) ;
 
-  if(dst_pid <  0 || src_va < 0 || size < 0) 
-    return -1;
+//   if(dst_pid <  0 || src_va < 0 || size < 0) 
+//     return -1;
 
-  struct proc* dst_proc = find_proc(dst_pid);
-  if (dst_proc == 0)
-    return -1;
+//   struct proc* dst_proc = find_proc(dst_pid);
+//   if (dst_proc == 0)
+//     return -1;
 
-  return map_shared_pages(myproc(), dst_proc, src_va, size);
+    
+//   printf("[sys_map_shared_pages] src_va=0x%x, size=%d, dst_pid=%d\n", src_va, size, dst_pid);
+//   return map_shared_pages(myproc(), dst_proc, src_va, size);
+// }
+
+
+// uint64
+// sys_unmap_shared_pages(void){
+  
+//   uint64 addr , size ;
+
+//   argaddr(0 , &addr) ; 
+//   argaddr(1 , &size) ;
+
+//   if( addr < 0 || size < 0) 
+//     return -1;
+    
+//   return unmap_shared_pages(myproc() , addr , size) ;
+// }
+
+
+uint64 sys_map_shared_pages(void) {
+    int src_pid, dst_pid;
+    uint64 src_va, size;
+    
+    // Get arguments from user space
+    argint(0, &src_pid);
+    argint(1, &dst_pid);
+    argaddr(2, &src_va);
+    argaddr(3, &size);
+
+    if(src_pid < 0 || dst_pid < 0 || src_va < 0 || size < 0)
+      return -1;
+    
+    struct proc *src_proc = 0, *dst_proc = 0;
+    
+    
+    // Find source and destination processes
+    src_proc = find_proc(src_pid) ;
+    dst_proc = find_proc(dst_pid) ;
+    
+    if(!src_proc || !dst_proc)
+        return -1;
+    
+    // Call the kernel function
+    uint64 result = map_shared_pages(src_proc, dst_proc, src_va, size);
+    return result;
 }
 
+uint64 sys_unmap_shared_pages(void) {
+    uint64 addr, size;
+    argaddr(0, &addr);
+    argaddr(1, &size);
 
-uint64
-sys_unmap_shared_pages(void){
-  int dst_pid ;
-  uint64 addr , size ;
-
-  argint(0, &dst_pid) ;
-  argaddr(1 , &addr) ; 
-  argaddr(2 , &size) ;
-
-  if(dst_pid <  0 || addr < 0 || size < 0) 
-    return -1;
-
-  struct proc* dst_proc = find_proc(dst_pid) ;
-  if(dst_proc == 0 )
-    return -1 ;
+    // Get arguments from user space
+    if(addr < 0 || size < 0)
+        return -1;
     
-  return unmap_shared_pages(dst_proc , addr , size) ;
+    struct proc *p = myproc();
+    return unmap_shared_pages(p, addr, size);
 }
 
 uint64

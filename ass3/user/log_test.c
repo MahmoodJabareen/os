@@ -67,11 +67,53 @@
 
 
 
+
+
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "user/user.h"
 #include "kernel/riscv.h"
-#include <stdio.h>
+
+
+//helper function to use instead of snprintf for now 
+static int write_message(char *buf, int index) {
+    const char *prefix = "[child ";
+    const char *suffix = "] Hello!\n";
+
+    int i = 0;
+
+    // Copy prefix
+    for (int j = 0; prefix[j] != '\0'; j++) {
+        buf[i++] = prefix[j];
+    }
+
+    // Handle index conversion (digits in reverse order first)
+    char digits[10];
+    int d = 0;
+
+    if (index == 0) {
+        digits[d++] = '0';
+    } else {
+        while (index > 0) {
+            digits[d++] = '0' + (index % 10);
+            index /= 10;
+        }
+    }
+
+    // Append digits in correct order
+    for (int j = d - 1; j >= 0; j--) {
+        buf[i++] = digits[j];
+    }
+
+    // Copy suffix
+    for (int j = 0; suffix[j] != '\0'; j++) {
+        buf[i++] = suffix[j];
+    }
+
+    buf[i] = '\0';  // null-terminate
+    return i;       // return length of message
+}
+
 
 #define NCHILDREN 4
 #define MAX_MSG_LENGTH 40
@@ -100,7 +142,7 @@ int main(){
             int len ; 
 
             while(1){
-                len = snprintf(msg , MAX_MSG_LENGTH , "Child with index [%d] said hello\n" , index) ; //write the messgae and return the lenght
+                len = write_message(msg , index) ; //write the messgae and return the lenght
                 uint64 addr = (uint64) shared_buffer ;
                 uint64 end = addr + PGSIZE ;
 
@@ -124,11 +166,11 @@ int main(){
     }
 
     for(int i = 0 ; i < NCHILDREN ; i++){
-        if(map_shared_pages(parent_pid , children_pids[i] , shared_buffer , PGSIZE) < 0){
+        if(map_shared_pages(parent_pid , children_pids[i] , (uint64)shared_buffer , PGSIZE) < 0){
             printf("Failed mapping the buffer with child %d" , children_pids[i]) ;
             exit(1) ;
         }
-        if(map_shared_pages(parent_pid , children_pids[i] , ready , sizeof(int)) < 0){
+        if(map_shared_pages(parent_pid , children_pids[i] , (uint64)ready , sizeof(int)) < 0){
             printf("Failed mapping the ready_sign with child %d" , children_pids[i]) ;
             exit(1) ;
         }
@@ -137,7 +179,7 @@ int main(){
     *ready = 1 ; // signal the children to start writing 
 
     uint64 addr = (uint64)shared_buffer ;
-    uint64 end = shared_buffer + PGSIZE ;
+    uint64 end = (uint64)shared_buffer + PGSIZE ;
 
     while(1){
         if(addr + 4 >=end) break ;

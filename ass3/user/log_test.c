@@ -5,7 +5,7 @@
 // #include <stdio.h>
 
 // #define NCHILDREN 4
-// #define MSGLENGTH 15
+// #define MAX_MSG_LENGTH 15
 
 
 
@@ -74,7 +74,7 @@
 #include <stdio.h>
 
 #define NCHILDREN 4
-#define MSGLENGTH 15
+#define MAX_MSG_LENGTH 40
 static int children_pids[NCHILDREN] ;
 static int* ready;
 
@@ -96,11 +96,11 @@ int main(){
                 ;
             }
             int index = i ; 
-            char msg[MSGLENGTH] ;
+            char msg[MAX_MSG_LENGTH] ;
             int len ; 
 
             while(1){
-                len = snprintf(msg , MSGLENGTH , "Child with index [%d] said hello \n" , index) ; //write the messgae and return the lenght
+                len = snprintf(msg , MAX_MSG_LENGTH , "Child with index [%d] said hello\n" , index) ; //write the messgae and return the lenght
                 uint64 addr = (uint64) shared_buffer ;
                 uint64 end = addr + PGSIZE ;
 
@@ -144,8 +144,19 @@ int main(){
 
         uint32* header = (uint32*) (shared_buffer) ;
         if(*header !=0){
-            
-        }
-    }
+            int index = (*header >>16 ) & 0xFFFF ;
+            int length = (*header) & 0xFFFF ;
 
+            char* msg_ptr = (char*) (addr + 4) ; 
+            char msg[MAX_MSG_LENGTH] ;
+            memcpy(msg_ptr , msg , length) ;
+            printf("[parent] Message received from child %d :%s " , index , msg) ;
+        }
+        addr += addr + 4 + MAX_MSG_LENGTH ;
+        addr = (addr + 3) & ~3;
+    }
+    for(int i = 0 ; i < NCHILDREN ; i++){
+        wait(0) ;
+    }
+    exit(0) ;
 }

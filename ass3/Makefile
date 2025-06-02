@@ -120,6 +120,7 @@ UPROGS=\
 	$U/_echo\
 	$U/_forktest\
 	$U/_shmem_test\
+	$U/_log_test\
 	$U/_grep\
 	$U/_init\
 	$U/_kill\

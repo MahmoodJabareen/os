@@ -76,7 +76,7 @@
 
 
 //helper function to use instead of snprintf for now 
-static int write_message(char *buf, int index) {
+ int write_message(char *buf, int index) {
     const char *prefix = "[child ";
     const char *suffix = "] Hello!\n";
 

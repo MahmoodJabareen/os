@@ -96,9 +96,9 @@ void read_message(uint64 va)
         uint16 child_index = header >> 16;
         uint16 msg_len = header & 0xFFFF;
         printf("[parent] Received message from child %d with length %d, at address: 0x%lx\n", child_index, msg_len, addr);
-        char msg[MAX_MSG_LENGTH] = {0};
+        char msg[MAX_MSG_LENGTH] ={'\0'};
         memcpy(msg, (uint64 *)(addr + 4), msg_len);
-        // msg[msg_len] = 0;
+        // msg[msg_len] = '\0';  // important!
         printf("[parent %d] %s\n", child_index, msg);
 
         addr += 4 + msg_len;

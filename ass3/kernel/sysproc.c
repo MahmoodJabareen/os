@@ -90,41 +90,7 @@ sys_uptime(void)
   return xticks;
 }
 
-// uint64
-// sys_map_shared_pages(void) {
-//   int dst_pid ;
-//   uint64   src_va, size;
 
-//   argint(0, &dst_pid) ;
-//   argaddr(1 , &src_va) ; 
-//   argaddr(2 , &size) ;
-
-//   if(dst_pid <  0 || src_va < 0 || size < 0) 
-//     return -1;
-
-//   struct proc* dst_proc = find_proc(dst_pid);
-//   if (dst_proc == 0)
-//     return -1;
-
-    
-//   printf("[sys_map_shared_pages] src_va=0x%x, size=%d, dst_pid=%d\n", src_va, size, dst_pid);
-//   return map_shared_pages(myproc(), dst_proc, src_va, size);
-// }
-
-
-// uint64
-// sys_unmap_shared_pages(void){
-  
-//   uint64 addr , size ;
-
-//   argaddr(0 , &addr) ; 
-//   argaddr(1 , &size) ;
-
-//   if( addr < 0 || size < 0) 
-//     return -1;
-    
-//   return unmap_shared_pages(myproc() , addr , size) ;
-// }
 
 
 uint64 sys_map_shared_pages(void) {
@@ -138,20 +104,28 @@ uint64 sys_map_shared_pages(void) {
     argaddr(3, &size);
 
     if(src_pid < 0 || dst_pid < 0 || src_va < 0 || size < 0)
-      return -1;
+        return -1;
     
     struct proc *src_proc = 0, *dst_proc = 0;
     
-    
     // Find source and destination processes
-    src_proc = find_proc(src_pid) ;
-    dst_proc = find_proc(dst_pid) ;
+    src_proc = find_proc(src_pid);
+    dst_proc = find_proc(dst_pid);
     
     if(!src_proc || !dst_proc)
         return -1;
-    
+
+    // Acquire locks for both processes
+    acquire(&src_proc->lock);
+    acquire(&dst_proc->lock);
+
     // Call the kernel function
     uint64 result = map_shared_pages(src_proc, dst_proc, src_va, size);
+
+    // Release locks
+    release(&dst_proc->lock);
+    release(&src_proc->lock);
+
     return result;
 }
 
@@ -165,12 +139,30 @@ uint64 sys_unmap_shared_pages(void) {
         return -1;
     
     struct proc *p = myproc();
-    return unmap_shared_pages(p, addr, size);
+
+    // Acquire lock for the current process
+    acquire(&p->lock);
+
+    uint64 result = unmap_shared_pages(p, addr, size);
+
+    // Release lock
+    release(&p->lock);
+
+    return result;
 }
 
 uint64
 sys_getprocsize(void)
 {
   struct proc *p = myproc();
-  return p->sz;
+
+  // Acquire lock for the current process
+  acquire(&p->lock);
+
+  uint64 size = p->sz;
+
+  // Release lock
+  release(&p->lock);
+
+  return size;
 }

@@ -4,7 +4,7 @@
 #include "user/user.h"
 #include "kernel/riscv.h"
 
-#define NCHILDREN 4
+#define NCHILDREN 10
 #define MAX_MSG_LENGTH 50
 static int children_pids[NCHILDREN];
 static uint64 vas[NCHILDREN];
@@ -70,7 +70,6 @@ void write_message(int child_index, uint64 va, const char *message)
         {
             // Successfully wrote the header, now write the message
             memcpy((uint64 *)(address + 4), message, msg_length);
-            //break; // Exit the loop after writing the message
             sleep(10) ;
             
         }
@@ -98,7 +97,6 @@ void read_message(uint64 va)
         printf("[parent] Received message from child %d with length %d, at address: 0x%lx\n", child_index, msg_len, addr);
         char msg[MAX_MSG_LENGTH] ={'\0'};
         memcpy(msg, (uint64 *)(addr + 4), msg_len);
-        // msg[msg_len] = '\0';  // important!
         printf("[parent %d] %s\n", child_index, msg);
 
         addr += 4 + msg_len;
@@ -125,6 +123,8 @@ int main()
         if (children_pids[i] == 0)
         {
             children_pids[i] = getpid();
+            //after you got forked get out 
+            break;
         }
         if (children_pids[i] < 0)
         {
@@ -163,7 +163,6 @@ int main()
             printf("Failed to map shared pages for child %d\n", getpid());
             return -1;
         }
-        // printf("Child %d mapped shared buffer at address %p\n", getpid(), vas[child_index]);
         // write to the shared buffer
         char message[MAX_MSG_LENGTH];
         snprintf_from_temu(message, child_index);

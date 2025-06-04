@@ -30,6 +30,19 @@ sys_fork(void)
   return fork();
 }
 
+uint64 sys_forkn(void){
+  int* pids;
+  int n; 
+  argint(0, &n); 
+  if(n < 1 || n >= 16){
+    return -1;
+  }   
+  argaddr(1 , (uint64 *)&pids);
+  return forkn(n, pids);
+
+}
+
+
 uint64
 sys_wait(void)
 {
@@ -38,6 +51,15 @@ sys_wait(void)
   argaddr(0, &p);
   argaddr(1, &msg_addr);
   return wait(p ,msg_addr );
+}
+uint64 sys_waitall(void)
+{
+  uint64 n;
+  uint64 statuses; // Pointer to the statuses array
+
+  argaddr(0, &n);
+  argaddr(1, &statuses);
+  return waitall(n, statuses); // Wait for child process
 }
 
 uint64

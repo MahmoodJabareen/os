@@ -106,4 +106,6 @@ struct proc {
   char name[16];               // Process name (debugging)
 
   char exit_msg[32];           // Process exit message 
+
+  int number;
 };

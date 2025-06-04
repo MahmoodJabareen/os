@@ -150,7 +150,6 @@ int main()
                 break;
             }
         }
-        printf("%d", child_index);
         if (child_index == -1)
         {
 

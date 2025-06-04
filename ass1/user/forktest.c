@@ -20,8 +20,10 @@ forktest(void)
 
   print("fork test\n");
 
-  for(n=0; n<N; n++){
+  for(n=0; n<5; n++){
     pid = fork();
+
+    print("here we go --- \n");
     if(pid < 0)
       break;
     if(pid == 0)
